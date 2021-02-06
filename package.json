@@ -1,0 +1,15 @@
+{
+  "name": "node_md2pdf_generator",
+  "version": "1.0.0",
+  "description": "Markdown2pdf generator in nodejs",
+  "author": "Jochen Metzger <j.metzger@t3company.de>",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "git-clone": "^0.1.0",
+    "md-to-pdf": "^3.2.1",
+    "shelljs": "^0.8.4"
+  }
+}

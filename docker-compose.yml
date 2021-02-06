@@ -1,0 +1,14 @@
+version: "2"
+services:
+  node:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    user: "node"
+    working_dir: /home/node/app
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - ./:/home/node/app
+    command: "npm start"
+
