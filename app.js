@@ -1,5 +1,11 @@
 'use strict'
 
+/**
+ * Set vars 
+ **/
+var tmpFolder = 'tmp'
+var codeCounter = 0
+
 function getSubpageAndTransform(p_path, p_content){
 
   try {
@@ -15,6 +21,12 @@ function getSubpageAndTransform(p_path, p_content){
        else if ( _index > 0 ){
          p_content.push(_item)
        }
+     
+       // used for sanity checking 
+       if (_index > 0 && _item.substring(0,3) == '```'){
+         codeCounter++
+       }
+
      })
      p_content.push(_pageBreak)
      p_content.push('')
@@ -32,10 +44,9 @@ function getSubpageAndTransform(p_path, p_content){
  * Clone the repo  
  **/
 
-var tmpFolder = 'tmp'
 const _pageBreak = '<div class="page-break"></div>'
 const shell = require('shelljs')
-const url = "https://github.com/jmetzger/training-mariadb-komplettkurs.git"
+const url = "https://github.com/jmetzger/2021-linux-basiswissen.git"
 var fs = require('fs');
 
 shell.exec('git clone ' + url + ' ' + tmpFolder)
@@ -189,3 +200,4 @@ fs.writeFile(_outputPath, _output, function (err,data) {
   }
 })();
 
+console.log('codeCounter',codeCounter)
