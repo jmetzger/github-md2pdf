@@ -1,11 +1,9 @@
 'use strict'
 
-
 /**
  * Set vars 
  **/
 var tmpFolder = 'tmp'
-const url = "https://github.com/jmetzger/2021-linux-basiswissen.git"
 
 function getSubpageAndTransform(p_path, p_content){
 
@@ -42,33 +40,7 @@ function getSubpageAndTransform(p_path, p_content){
 
 }
 
-function _rewriteAgendaLink(_line){
 
-    if (_line.substring(5,8) == "* ["){
-       let _linkSplit = _line.substring(8).trim().split(']')
- 
-       if ( _linkSplit[1].substring(1,5) == 'http'){
-          _linkString=_linkSplit[1].substring(1).slice(0,-1)
-          return '  * ' + _linkString 
-
-       }
-       
-       return _line.substring(0,8) 
-              + _linkSplit[0] + '](#' 
-              + _rewriteAnchorJumper(_linkSplit[0]) + ')'
-
-    }
-    return _line
-
-}
-
-function _rewriteAnchorJumper(p_str){
-
-  p_str = p_str.toLowerCase()
-  p_str = p_str.replace(/ /g,'-')
-  p_str = p_str.replace(/[?/()*]/g,'')
-  return p_str
-}
 
 /** 
  * Clone the repo  
@@ -76,6 +48,7 @@ function _rewriteAnchorJumper(p_str){
 
 const _pageBreak = '<div class="page-break"></div>'
 const shell = require('shelljs')
+const url = "https://github.com/jmetzger/2021-linux-basiswissen.git"
 var fs = require('fs');
 
 shell.exec('git clone ' + url + ' ' + tmpFolder)
@@ -117,15 +90,7 @@ var _agendaTitle = []
 _agendaTitle.push('')
 _agendaTitle.push('')
 _agendaTitle.push('## Agenda')
-var _agendaSectionOrig = lines.slice(_agendaSectionStart,_agendaSectionStop)
-var _agendaSectionKeep = []
-
-_agendaSectionOrig.forEach (async function(_line, index) {
-
-   _agendaSectionKeep.push(_rewriteAgendaLink(_line))
-
-})
-
+var _agendaSectionKeep = lines.slice(_agendaSectionStart,_agendaSectionStop)
 _agendaSectionKeep.push('') // add new line 
 _agendaSectionKeep.push(_pageBreak)
 _agendaSectionKeep.push('')
