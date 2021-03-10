@@ -4,12 +4,12 @@
  * Set vars 
  **/
 var tmpFolder = 'tmp'
-var codeCounter = 0
 
 function getSubpageAndTransform(p_path, p_content){
 
   try {
      let _lines = fs.readFileSync('' + tmpFolder + p_path, 'utf8').split('\n');
+     var _codeCounter = 0  
 
      _lines.forEach(async function(_item, _index) {
 
@@ -24,12 +24,14 @@ function getSubpageAndTransform(p_path, p_content){
      
        // used for sanity checking 
        if (_index > 0 && _item.substring(0,3) == '```'){
-         codeCounter++
+         _codeCounter++
        }
 
      })
      p_content.push(_pageBreak)
      p_content.push('')
+     return {codeCounter: _codeCounter}
+     //return _ret
 
    } catch(e){
 
@@ -145,12 +147,16 @@ _agendaSectionRewrite.forEach (async function(_line, index) {
           
           // p_content will get referenced and changed
           let _docPath=_linkSplit[1].substring(1).slice(0,-1)
-          getSubpageAndTransform(_docPath, _contentSubSection)
+          let _return = getSubpageAndTransform(_docPath, _contentSubSection)
+          showCodeCounter(_docPath,_return)
+
 
        } else { 
          /** file is probably in root-level **/
          let _docPath="/" + _linkSplit[1].substring(1).slice(0,-1)
-         getSubpageAndTransform(_docPath, _contentSubSection)
+         let _return = getSubpageAndTransform(_docPath, _contentSubSection)
+         showCodeCounter(_docPath,_return)
+         //console.log(`codeCounter for ${_docPath} is: ${_return.codeCounter}`)
        }
   
 
@@ -188,6 +194,20 @@ fs.writeFile(_outputPath, _output, function (err,data) {
   }
 });
 
+
+/**
+ * Little helper function to showCodeCounter
+ **/
+
+function showCodeCounter(p_docPath,p_return){
+
+   if (p_return !== undefined 
+      && p_return.codeCounter !== undefined
+      && p_return.codeCounter % 2 == 1){
+      console.log(`codeCounter for ${p_docPath} is: ${p_return.codeCounter}`)
+   }
+}
+
 /** 
  * Create pdf 
  **/
@@ -200,4 +220,3 @@ fs.writeFile(_outputPath, _output, function (err,data) {
   }
 })();
 
-console.log('codeCounter',codeCounter)
