@@ -5,7 +5,7 @@
  * Set vars 
  **/
 var tmpFolder = 'tmp'
-const url = "https://github.com/jmetzger/2021-linux-basiswissen.git"
+const url = "https://github.com/jmetzger/2021-adv-mysql.git"
 
 function getSubpageAndTransform(p_path, p_content){
 
@@ -49,7 +49,10 @@ function _rewriteAgendaLink(_line){
  
        if ( _linkSplit[1].substring(1,5) == 'http'){
           _linkString=_linkSplit[1].substring(1).slice(0,-1)
-          return '  * ' + _linkString 
+          //return '     * ' + _linkString 
+          return _line.substring(0,8)
+                 + _linkSplit[0] + ']('
+                 + _linkString + ')'
 
        }
        
