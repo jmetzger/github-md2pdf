@@ -5,7 +5,9 @@
  * Set vars 
  **/
 var tmpFolder = 'tmp'
-const url = "https://github.com/jmetzger/2021-adv-mysql.git"
+//const url = "https://github.com/jmetzger/2021-linux-basiswissen.git"
+//const url = "https://github.com/jmetzger/2021-linux-individualtraining.git"
+const url = "https://github.com/jmetzger/training-mariadb-komplettkurs.git"
 
 function getSubpageAndTransform(p_path, p_content){
 
