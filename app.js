@@ -7,9 +7,16 @@
  * Set vars 
  **/
 var tmpFolder = 'tmp'
-//const url = "https://github.com/jmetzger/2021-linux-basiswissen.git"
-//const url = "https://github.com/jmetzger/2021-linux-individualtraining.git"
-const url = "https://github.com/jmetzger/training-mariadb-komplettkurs.git"
+var _loadedDocPaths = {}
+// const url = "https://github.com/jmetzger/2021-linux-basiswissen.git"
+const url = "https://github.com/jmetzger/training-mariadb-performance.git"
+
+/**
+ * Load some libraries 
+ **/
+const r = require('./modules/rewriter')
+const a = require('./modules/analyzer')
+
 
 function getSubpageAndTransform(p_path, p_content){
 
@@ -46,36 +53,7 @@ function getSubpageAndTransform(p_path, p_content){
 
 }
 
-function _rewriteAgendaLink(_line){
 
-    if (_line.substring(5,8) == "* ["){
-       let _linkSplit = _line.substring(8).trim().split(']')
- 
-       if ( _linkSplit[1].substring(1,5) == 'http'){
-          _linkString=_linkSplit[1].substring(1).slice(0,-1)
-          //return '     * ' + _linkString 
-          return _line.substring(0,8)
-                 + _linkSplit[0] + ']('
-                 + _linkString + ')'
-
-       }
-       
-       return _line.substring(0,8) 
-              + _linkSplit[0] + '](#' 
-              + _rewriteAnchorJumper(_linkSplit[0]) + ')'
-
-    }
-    return _line
-
-}
-
-function _rewriteAnchorJumper(p_str){
-
-  p_str = p_str.toLowerCase()
-  p_str = p_str.replace(/ /g,'-')
-  p_str = p_str.replace(/[?/()*]/g,'')
-  return p_str
-}
 
 /** 
  * Clone the repo  
@@ -95,6 +73,11 @@ const { mdToPdf } = require('md-to-pdf');
 
 var _headSectionStart=0
 var _headSectionStop=0
+
+/**
+ * Remembers the old/new version of links that we have rewritten
+ **/
+var _link = {} 
 
 /**
  * First we want to find our headSection 
@@ -129,7 +112,12 @@ var _agendaSectionKeep = []
 
 _agendaSectionOrig.forEach (async function(_line, index) {
 
-   _agendaSectionKeep.push(_rewriteAgendaLink(_line))
+   let _ret = r.rewriteAgendaLink(_line)
+   _agendaSectionKeep.push(_ret.link)
+   
+   if (_ret.fromUrl !== undefined && _ret.toUrl !== undefined){
+      _link[_ret.fromUrl] = _ret.toUrl  
+   } 
 
 })
 
@@ -171,7 +159,6 @@ _agendaSectionRewrite.forEach (async function(_line, index) {
     }
 
     if (_line.substring(5,8) == "* ["){
-       //console.log ('subelement:' + _line.substring(8).trim() + ':found')
        let _linkSplit = _line.substring(8).trim().split(']')
 
        _contentSubSection.push('### ' + _linkSplit[0])
@@ -185,25 +172,22 @@ _agendaSectionRewrite.forEach (async function(_line, index) {
           _contentSubSection.push('')
 
        }
-       else if ( _linkSplit[1].substring(1,2) == "/"){
-          
-          // p_content will get referenced and changed
-          let _docPath=_linkSplit[1].substring(1).slice(0,-1)
+       else {
+
+          let _prefix = ''
+          if ( _linkSplit[1].substring(1,2) !== "/"){
+             _prefix = "/"
+          }   
+
+          /** unchanged version **/
+          let _realDocPath= _linkSplit[1].substring(1).slice(0,-1)
+          let _docPath = _prefix + _realDocPath 
           let _return = getSubpageAndTransform(_docPath, _contentSubSection)
-          showCodeCounter(_docPath,_return)
+          a.showCodeCounter(_docPath,_return)
 
 
-       } else { 
-         /** file is probably in root-level **/
-         let _docPath="/" + _linkSplit[1].substring(1).slice(0,-1)
-         let _return = getSubpageAndTransform(_docPath, _contentSubSection)
-         showCodeCounter(_docPath,_return)
-         //console.log(`codeCounter for ${_docPath} is: ${_return.codeCounter}`)
-       }
-  
-
+       } 
     }
-
 
 })
 
@@ -227,7 +211,7 @@ let _output,_outputPath
 _output  = _headSection.join('\n') 
 _output += _agendaTitle.join('\n')
 _output += _agendaSectionKeep.join('\n') 
-_output += _contentSection.join('\n')
+_output += _convertLinksInDocument2Anchors(_contentSection.join('\n'),_link)
 
 _outputPath = 'tmp/_README.md'
 fs.writeFile(_outputPath, _output, function (err,data) {
@@ -236,19 +220,33 @@ fs.writeFile(_outputPath, _output, function (err,data) {
   }
 });
 
-
-/**
- * Little helper function to showCodeCounter
- **/
-
-function showCodeCounter(p_docPath,p_return){
-
-   if (p_return !== undefined 
-      && p_return.codeCounter !== undefined
-      && p_return.codeCounter % 2 == 1){
-      console.log(`codeCounter for ${p_docPath} is: ${p_return.codeCounter}`)
+function _convertLinksInDocument2Anchors(p_content,p_links){
+   
+   let elements = p_content.match(/\[.*?\)/g);
+   if( elements != null && elements.length > 0){
+     for(let el of elements){
+       let matchArr = el.match(/\[(.*?)\]/)
+       if (matchArr !== null){
+          let _txt = matchArr[1]
+          let _url = el.match(/\((.*?)\)/)[1];//get only the link
+          if (p_links[_url] !== undefined){
+             _url = p_links[_url]
+          }
+          if (p_links['/' + _url] !== undefined){
+             _url = p_links['/' + _url]
+          }
+          /** get rid of the first char and retry **/
+          if (p_links[_url.substr(1)] !== undefined){
+             _url = p_links[_url.substr(1)]
+          }
+          p_content = p_content.replace(el,`[${_txt}](${_url})`)
+        }
+     }
    }
+   return p_content   
 }
+
+
 
 /** 
  * Create pdf 
