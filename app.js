@@ -8,8 +8,9 @@
  **/
 var tmpFolder = 'tmp'
 var _loadedDocPaths = {}
-// const url = "https://github.com/jmetzger/2021-linux-basiswissen.git"
-const url = "https://github.com/jmetzger/training-mariadb-performance.git"
+const url = "https://github.com/jmetzger/2021-mysql-grundlagen-hannover"
+
+
 
 /**
  * Load some libraries 
