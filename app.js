@@ -8,8 +8,7 @@
  **/
 var tmpFolder = 'tmp'
 var _loadedDocPaths = {}
-// const url = "https://github.com/jmetzger/training-git.git" 
-const url = "https://github.com/jmetzger/mariadb-fuer-entwickler.git"
+const url = "https://github.com/jmetzger/training-gitops" 
 
 /**
  * Load some libraries 
