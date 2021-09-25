@@ -14,4 +14,4 @@ RUN npm install
 
 # Bundle app source
 COPY app.js .
-CMD [ "node", "app.js" ]
+CMD [ "node", "./app.js" ]
