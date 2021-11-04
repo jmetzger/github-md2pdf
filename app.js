@@ -1,20 +1,27 @@
 'use strict'
 
 /**
+ * Load some libraries 
+ **/
+const r = require('./modules/rewriter')
+const a = require('./modules/analyzer')
+
+/**
+ * libraries for creating checksum 
+ **/
+const sha1 = require('sha1');
+
+
+/**
  * better versio
  **/
 /**
  * Set vars 
  **/
-var tmpFolder = 'tmp'
 var _loadedDocPaths = {}
-const url = "https://github.com/jmetzger/training-gitops" 
+const url = "https://github.com/jmetzger/training-docker-grundlagen.git" 
+var tmpFolder = 'tmp/' + sha1(url) + '/'
 
-/**
- * Load some libraries 
- **/
-const r = require('./modules/rewriter')
-const a = require('./modules/analyzer')
 
 
 function getSubpageAndTransform(p_path, p_content){
@@ -62,7 +69,17 @@ const _pageBreak = '<div class="page-break"></div>'
 const shell = require('shelljs')
 var fs = require('fs');
 
-shell.exec('git clone ' + url + ' ' + tmpFolder)
+
+if (fs.existsSync(tmpFolder)) {
+   console.log('Pulling newest version');
+   shell.exec ('cd ' + tmpFolder + '; git pull; cd ..')
+} else {
+   console.log('Cloning into ' + tmpFolder) 
+   shell.exec('git clone ' + url + ' ' + tmpFolder )
+}
+
+
+//shell.exec('git clone ' + url + ' ' + tmpFolder )
 var lines = fs.readFileSync('' + tmpFolder + '/README.md', 'utf8').split('\n');
 const { mdToPdf } = require('md-to-pdf');
 
@@ -258,4 +275,11 @@ function _convertLinksInDocument2Anchors(p_content,p_links){
     fs.writeFileSync(pdf.filename, pdf.content);
   }
 })();
+
+/**
+ * Finally pushing newest version 
+ **/
+
+console.log('Eventually uploading newest version')
+shell.exec('cd tmpFolder; git add .; git commit -am "newest pdf"; git push')
 
