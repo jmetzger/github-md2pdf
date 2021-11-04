@@ -13,9 +13,6 @@ const sha1 = require('sha1');
 
 
 /**
- * better versio
- **/
-/**
  * Set vars 
  **/
 var _loadedDocPaths = {}
@@ -79,7 +76,6 @@ if (fs.existsSync(tmpFolder)) {
 }
 
 
-//shell.exec('git clone ' + url + ' ' + tmpFolder )
 var lines = fs.readFileSync('' + tmpFolder + '/README.md', 'utf8').split('\n');
 const { mdToPdf } = require('md-to-pdf');
 
@@ -229,7 +225,7 @@ _output += _agendaTitle.join('\n')
 _output += _agendaSectionKeep.join('\n') 
 _output += _convertLinksInDocument2Anchors(_contentSection.join('\n'),_link)
 
-_outputPath = 'tmp/_README.md'
+_outputPath = tmpFolder + '_README.md'
 fs.writeFile(_outputPath, _output, function (err,data) {
   if (err) {
     return console.log(err);
@@ -269,7 +265,7 @@ function _convertLinksInDocument2Anchors(p_content,p_links){
  **/
 
 (async () => {
-  const pdf = await mdToPdf({ path: './tmp/_README.md' }, { dest: './tmp/README.pdf' }).catch(console.error);
+  const pdf = await mdToPdf({ path: './' + tmpFolder + '/_README.md' }, { dest: './' + tmpFolder + '/README.pdf' }).catch(console.error);
 
   if (pdf) {
     fs.writeFileSync(pdf.filename, pdf.content);
@@ -281,5 +277,5 @@ function _convertLinksInDocument2Anchors(p_content,p_links){
  **/
 
 console.log('Eventually uploading newest version')
-shell.exec('cd tmpFolder; git add .; git commit -am "newest pdf"; git push')
+shell.exec('cd ' + tmpFolder + '; git add .; git commit -am "newest pdf"; git push')
 
