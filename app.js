@@ -16,7 +16,7 @@ const sha1 = require('sha1');
  * Set vars 
  **/
 var _loadedDocPaths = {}
-const url = "https://github.com/jmetzger/training-docker-grundlagen.git" 
+const url = "https://github.com/jmetzger/training-linux-security.git" 
 var tmpFolder = 'tmp/' + sha1(url) + '/'
 
 
@@ -151,6 +151,12 @@ var _contentSection = []
 var _contentSubSection = []
 var _linkString = ''
 
+/**
+ * Detect if we have misformed code blocks
+ * - Done by codeCounter
+ **/
+var _isCodeBlockBroken = false
+
 _agendaSectionRewrite.forEach (async function(_line, index) {
 
     if ( _line.substring(2,5) == '1. '){
@@ -196,12 +202,29 @@ _agendaSectionRewrite.forEach (async function(_line, index) {
           let _docPath = _prefix + _realDocPath 
           let _return = getSubpageAndTransform(_docPath, _contentSubSection)
           a.showCodeCounter(_docPath,_return)
-
+          if (a.isCodeBlockBroken(_return)){
+             _isCodeBlockBroken = true
+          }
 
        } 
     }
 
 })
+
+/**
+ * We have to give up here
+ * and user needs to interact 
+ **/
+
+if (_isCodeBlockBroken === true){
+
+   console.log('<----')
+   console.log('SORRY, CANNOT PROCEED, YOU HAVE TO FIX THE ABOVE CODEBLOCKS FIRST')
+   process.exit(1)
+
+
+}
+
 
 /**
  * Add the last section  
