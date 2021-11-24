@@ -16,12 +16,12 @@ const sha1 = require('sha1');
  * Set vars 
  **/
 var _loadedDocPaths = {}
-const url = "https://github.com/jmetzger/training-linux-security.git" 
+const url = "https://github.com/jmetzger/training-mysql-admin-de.git" 
 var tmpFolder = 'tmp/' + sha1(url) + '/'
 
 
 
-function getSubpageAndTransform(p_path, p_content){
+async function getSubpageAndTransform(p_path, p_content){
 
   try {
      let _lines = fs.readFileSync('' + tmpFolder + p_path, 'utf8').split('\n');
@@ -56,7 +56,35 @@ function getSubpageAndTransform(p_path, p_content){
 
 }
 
+async function _convertLinksInDocument2Anchors(p_content,p_links){
+   
+   let elements = p_content.match(/\[.*?\)/g);
+   if( elements != null && elements.length > 0){
+     for(let el of elements){
+       let matchArr = el.match(/\[(.*?)\]/)
+       if (matchArr !== null){
+          let _txt = matchArr[1]
+          let _url = el.match(/\((.*?)\)/)[1];//get only the link
+          if (p_links[_url] !== undefined){
+             _url = p_links[_url]
+          }
+          if (p_links['/' + _url] !== undefined){
+             _url = p_links['/' + _url]
+          }
+          /** get rid of the first char and retry **/
+          if (p_links[_url.substr(1)] !== undefined){
+             _url = p_links[_url.substr(1)]
+          }
+          p_content = p_content.replace(el,`[${_txt}](${_url})`)
+        }
+     }
+   }
+   return p_content   
+}
 
+
+
+async function main(){
 
 /** 
  * Clone the repo  
@@ -200,7 +228,7 @@ _agendaSectionRewrite.forEach (async function(_line, index) {
           /** unchanged version **/
           let _realDocPath= _linkSplit[1].substring(1).slice(0,-1)
           let _docPath = _prefix + _realDocPath 
-          let _return = getSubpageAndTransform(_docPath, _contentSubSection)
+          let _return = await getSubpageAndTransform(_docPath, _contentSubSection)
           a.showCodeCounter(_docPath,_return)
           if (a.isCodeBlockBroken(_return)){
              _isCodeBlockBroken = true
@@ -246,7 +274,7 @@ let _output,_outputPath
 _output  = _headSection.join('\n') 
 _output += _agendaTitle.join('\n')
 _output += _agendaSectionKeep.join('\n') 
-_output += _convertLinksInDocument2Anchors(_contentSection.join('\n'),_link)
+_output += await _convertLinksInDocument2Anchors(_contentSection.join('\n'),_link)
 
 _outputPath = tmpFolder + '_README.md'
 fs.writeFile(_outputPath, _output, function (err,data) {
@@ -255,31 +283,6 @@ fs.writeFile(_outputPath, _output, function (err,data) {
   }
 });
 
-function _convertLinksInDocument2Anchors(p_content,p_links){
-   
-   let elements = p_content.match(/\[.*?\)/g);
-   if( elements != null && elements.length > 0){
-     for(let el of elements){
-       let matchArr = el.match(/\[(.*?)\]/)
-       if (matchArr !== null){
-          let _txt = matchArr[1]
-          let _url = el.match(/\((.*?)\)/)[1];//get only the link
-          if (p_links[_url] !== undefined){
-             _url = p_links[_url]
-          }
-          if (p_links['/' + _url] !== undefined){
-             _url = p_links['/' + _url]
-          }
-          /** get rid of the first char and retry **/
-          if (p_links[_url.substr(1)] !== undefined){
-             _url = p_links[_url.substr(1)]
-          }
-          p_content = p_content.replace(el,`[${_txt}](${_url})`)
-        }
-     }
-   }
-   return p_content   
-}
 
 
 
@@ -302,3 +305,7 @@ function _convertLinksInDocument2Anchors(p_content,p_links){
 console.log('Eventually uploading newest version')
 shell.exec('cd ' + tmpFolder + '; git add .; git commit -am "newest pdf"; git push')
 
+}
+
+
+main()
