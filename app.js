@@ -11,6 +11,14 @@ const a = require('./modules/analyzer')
  **/
 const sha1 = require('sha1');
 
+/**
+ * fs function  
+ **/
+var fs = require('fs');
+
+
+const {mdToPdf} = require('md-to-pdf');
+
 
 /**
  * Set vars 
@@ -84,6 +92,21 @@ async function _convertLinksInDocument2Anchors(p_content, p_links) {
 }
 
 
+async function createPdf(){
+
+    const pdf = await mdToPdf({
+            path: './' + tmpFolder + '/_README.md'
+        }, 
+        {
+            dest: './' + tmpFolder + '/README.pdf'
+        }
+    )
+
+    if (pdf) {
+       await fs.writeFileSync(pdf.filename, pdf.content);
+    }
+
+}
 
 async function main() {
 
@@ -93,22 +116,18 @@ async function main() {
 
     const _pageBreak = '<div class="page-break"></div>'
     const shell = require('shelljs')
-    var fs = require('fs');
 
 
     if (fs.existsSync(tmpFolder)) {
-        console.log('Pulling newest version');
-        shell.exec('cd ' + tmpFolder + '; git pull; cd ..')
+        await console.log('Pulling newest version');
+        await shell.exec('cd ' + tmpFolder + '; git pull; cd ..')
     } else {
-        console.log('Cloning into ' + tmpFolder)
-        shell.exec('git clone ' + url + ' ' + tmpFolder)
+        await console.log('Cloning into ' + tmpFolder)
+        await shell.exec('git clone ' + url + ' ' + tmpFolder)
     }
 
 
     var lines = fs.readFileSync('' + tmpFolder + '/README.md', 'utf8').split('\n');
-    const {
-        mdToPdf
-    } = require('md-to-pdf');
 
     /**
      * Now walk through the document and extract the head by getting a number
@@ -248,9 +267,9 @@ async function main() {
 
     if (_isCodeBlockBroken === true) {
 
-        console.log('<----')
-        console.log('SORRY, CANNOT PROCEED, YOU HAVE TO FIX THE ABOVE CODEBLOCKS FIRST')
-        process.exit(1)
+        await console.log('<----')
+        await console.log('SORRY, CANNOT PROCEED, YOU HAVE TO FIX THE ABOVE CODEBLOCKS FIRST')
+        await process.exit(1)
 
 
     }
@@ -279,37 +298,25 @@ async function main() {
     _output += await _convertLinksInDocument2Anchors(_contentSection.join('\n'), _link)
 
     _outputPath = tmpFolder + '_README.md'
+
+    await console.log('OUPUT of _README.md is::' + sha1(_output))
+
     fs.writeFile(_outputPath, _output, function(err, data) {
         if (err) {
             return console.log(err);
         }
-    });
+    })
 
 
+    await createPdf()
 
-
-    /** 
-     * Create pdf 
-     **/
-
-    (async () => {
-        const pdf = await mdToPdf({
-            path: './' + tmpFolder + '/_README.md'
-        }, {
-            dest: './' + tmpFolder + '/README.pdf'
-        }).catch(console.error);
-
-        if (pdf) {
-            fs.writeFileSync(pdf.filename, pdf.content);
-        }
-    })();
 
     /**
      * Finally pushing newest version 
      **/
 
-    console.log('Eventually uploading newest version')
-    shell.exec('cd ' + tmpFolder + '; git add .; git commit -am "newest pdf"; git push')
+    await console.log('Eventually uploading newest version')
+    await shell.exec('cd ' + tmpFolder + '; git status; git add .; git commit -am "newest pdf"; git push')
 
 }
 
