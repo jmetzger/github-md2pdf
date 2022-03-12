@@ -8,7 +8,7 @@ function rewriteAnchorJumper(p_str) {
 
     p_str = p_str.toLowerCase()
     p_str = p_str.replace(/ /g, '-')
-    p_str = p_str.replace(/[?/()*]/g, '')
+    p_str = p_str.replace(/[?/().,*]/g, '')
     return p_str
 }
 

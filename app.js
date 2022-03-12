@@ -24,7 +24,7 @@ const {mdToPdf} = require('md-to-pdf');
  * Set vars 
  **/
 var _loadedDocPaths = {}
-const url = "https://github.com/jmetzger/training-mysql-admin-de.git"
+const url = "https://github.com/jmetzger/training-kubernetes-docker.git"
 var tmpFolder = 'tmp/' + sha1(url) + '/'
 
 
