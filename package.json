@@ -8,8 +8,7 @@
     "start": "node app.js"
   },
   "dependencies": {
-    "git-clone": "^0.1.0",
-    "md-to-pdf": "^3.2.1",
+    "md-to-pdf": "^5.2.0",
     "sha1": "^1.1.1",
     "shelljs": "^0.8.4"
   }

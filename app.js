@@ -24,9 +24,8 @@ const {mdToPdf} = require('md-to-pdf');
  * Set vars 
  **/
 var _loadedDocPaths = {}
-const url = "https://github.com/jmetzger/training-kubernetes-docker.git"
-var tmpFolder = 'tmp/' + sha1(url) + '/'
-
+var tmpFolder
+var url
 
 
 async function getSubpageAndTransform(p_path, p_content) {
@@ -98,7 +97,8 @@ async function createPdf(){
             path: './' + tmpFolder + '/_README.md'
         }, 
         {
-            dest: './' + tmpFolder + '/README.pdf'
+            dest: './' + tmpFolder + '/README.pdf',
+            launch_options:	{ "args": ["--no-sandbox"] }
         }
     )
 
@@ -108,7 +108,30 @@ async function createPdf(){
 
 }
 
-async function main() {
+
+/**
+ * Check, if project is setup
+ **/
+
+ async function projectChecker() {
+
+    if ( typeof process.env.PR === 'undefined' ){
+       await console.log('No project. Giving up')
+       await process.exit(127)
+    }
+ 
+    url = "https://jmetzger@github.com/jmetzger/" + process.env.PR + ".git"
+    tmpFolder = 'tmp/' + sha1(url) + '/'
+    return true
+ }
+ 
+ 
+ async function main() {
+ 
+    /**
+     * Sanity check
+     **/
+     await projectChecker()
 
     /** 
      * Clone the repo  
@@ -317,8 +340,9 @@ async function main() {
 
     await console.log('Eventually uploading newest version')
     await shell.exec('cd ' + tmpFolder + '; git status; git add .; git commit -am "newest pdf"; git push')
-
+    await process.exit(0)
 }
 
 
 main()
+
