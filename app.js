@@ -24,14 +24,14 @@ const {mdToPdf} = require('md-to-pdf');
  * Set vars 
  **/
 var _loadedDocPaths = {}
-var tmpFolder
+var gitRepoFolder
 var url
 
 
 async function getSubpageAndTransform(p_path, p_content) {
 
     try {
-        let _lines = fs.readFileSync('' + tmpFolder + p_path, 'utf8').split('\n');
+        let _lines = fs.readFileSync('' + gitRepoFolder + p_path, 'utf8').split('\n');
         var _codeCounter = 0
 
         _lines.forEach(async function(_item, _index) {
@@ -94,10 +94,10 @@ async function _convertLinksInDocument2Anchors(p_content, p_links) {
 async function createPdf(){
 
     const pdf = await mdToPdf({
-            path: './' + tmpFolder + '/_README.md'
+            path: './' + gitRepoFolder + '/_README.md'
         }, 
         {
-            dest: './' + tmpFolder + '/README.pdf',
+            dest: './' + gitRepoFolder + '/README.pdf',
             launch_options:	{ "args": ["--no-sandbox"] }
         }
     )
@@ -121,7 +121,7 @@ async function createPdf(){
     }
  
     url = "https://jmetzger@github.com/jmetzger/" + process.env.PR + ".git"
-    tmpFolder = 'tmp/' + sha1(url) + '/'
+    gitRepoFolder = 'tmp/' + sha1(url) + '/'
     return true
  }
  
@@ -141,16 +141,16 @@ async function createPdf(){
     const shell = require('shelljs')
 
 
-    if (fs.existsSync(tmpFolder)) {
+    if (fs.existsSync(gitRepoFolder)) {
         await console.log('Pulling newest version');
-        await shell.exec('cd ' + tmpFolder + '; git pull; cd ..')
+        await shell.exec('cd ' + gitRepoFolder + '; git pull; cd ..')
     } else {
-        await console.log('Cloning into ' + tmpFolder)
-        await shell.exec('git clone ' + url + ' ' + tmpFolder)
+        await console.log('Cloning into ' + gitRepoFolder)
+        await shell.exec('git clone ' + url + ' ' + gitRepoFolder)
     }
 
 
-    var lines = fs.readFileSync('' + tmpFolder + '/README.md', 'utf8').split('\n');
+    var lines = fs.readFileSync('' + gitRepoFolder + '/README.md', 'utf8').split('\n');
 
     /**
      * Now walk through the document and extract the head by getting a number
@@ -320,7 +320,7 @@ async function createPdf(){
     _output += _agendaSectionKeep.join('\n')
     _output += await _convertLinksInDocument2Anchors(_contentSection.join('\n'), _link)
 
-    _outputPath = tmpFolder + '_README.md'
+    _outputPath = gitRepoFolder + '_README.md'
 
     await console.log('OUPUT of _README.md is::' + sha1(_output))
 
@@ -339,7 +339,7 @@ async function createPdf(){
      **/
 
     await console.log('Eventually uploading newest version')
-    await shell.exec('cd ' + tmpFolder + '; git status; git add .; git commit -am "newest pdf"; git push')
+    await shell.exec('cd ' + gitRepoFolder + '; git status; git add .; git commit -am "newest pdf"; git push')
     await process.exit(0)
 }
 

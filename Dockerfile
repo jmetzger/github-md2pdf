@@ -45,6 +45,8 @@ RUN npm i\
 
 USER runner
 
+ENV GIT_MODE=standalone
+
 # add git identification
 RUN git config --global user.email "dummy@pdfmaker.local" && \
 git config --global user.name "md2pdf-maker" 
