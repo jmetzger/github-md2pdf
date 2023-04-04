@@ -49,6 +49,7 @@ ENV GIT_MODE=standalone
 
 # add git identification
 RUN git config --global user.email "dummy@pdfmaker.local" && \
-git config --global user.name "md2pdf-maker" 
+git config --global user.name "md2pdf-maker" && \
+git config --global pull.rebase false 
 
 CMD [ "node", "/usr/src/app/app.js" ]

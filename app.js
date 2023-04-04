@@ -69,8 +69,8 @@ async function _convertLinksInDocument2Anchors(p_content, p_links) {
     let elements = p_content.match(/\[.*?\)/g);
     if (elements != null && elements.length > 0) {
         for (let el of elements) {
-            let matchArr = el.match(/\[(.*?)\]/)
-            if (matchArr !== null) {
+            let matchArr = el.match(/\[(.*?)\]\(.*\)/)
+	    if (matchArr !== null) {
                 let _txt = matchArr[1]
                 let _url = el.match(/\((.*?)\)/)[1]; //get only the link
                 if (p_links[_url] !== undefined) {
