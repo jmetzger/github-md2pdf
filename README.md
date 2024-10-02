@@ -9,5 +9,6 @@ docker exec -it abcdef sh
 
 ```
 export PR=training-mytraining
+export GITHUB_TOKEN=<hierkommtdertoken>
 node app.js
 ```
