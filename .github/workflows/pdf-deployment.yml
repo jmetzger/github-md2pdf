@@ -1,0 +1,26 @@
+name: Deploy PDF to Repository
+
+on:
+  workflow_dispatch:
+    inputs:
+      repository:
+        description: 'Repository name (e.g., training-kubernetes-einfuehrung)'
+        required: true
+        type: string
+
+jobs:
+  deploy-pdf:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Deploy PDF using Docker
+      run: |
+        docker run --rm \
+          -e PR="${{ github.event.inputs.repository }}" \
+          -e GITHUB_TOKEN="${{ secrets.ALL_GITHUB_REPOS_TOKEN }}" \
+          dockertrainereu/github-md2pdf:latest
+          
+    - name: Deployment Status
+      run: |
+        echo "PDF deployment completed for repository: ${{ github.event.inputs.repository }}"
+        echo "Check the target repository for the generated README.pdf file"
