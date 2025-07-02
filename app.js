@@ -108,7 +108,6 @@ async function createPdf(){
 
 }
 
-
 /**
  * Check, if project is setup
  **/
@@ -119,12 +118,13 @@ async function createPdf(){
        await console.log('No project. Giving up')
        await process.exit(127)
     }
- 
-    url = "https://jmetzger@github.com/jmetzger/" + process.env.PR + ".git"
+
+    url = "https://jmetzger:" + process.env.GITHUB_TOKEN + "@github.com/jmetzger/" + process.env.PR + ".git"
     gitRepoFolder = 'tmp/' + sha1(url) + '/'
     return true
  }
- 
+
+
  
  async function main() {
  
